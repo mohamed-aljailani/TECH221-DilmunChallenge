@@ -1,492 +1,63 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TECH 221 - Dilmun Math Quest</title>
-  <style>
-    :root{
-      --bg:#071018;
-      --bg2:#0c1b2b;
-      --panel:rgba(10,18,30,.86);
-      --panel2:rgba(14,28,48,.92);
-      --gold:#f5c16c;
-      --gold2:#ff9f43;
-      --cyan:#47d7ff;
-      --green:#29d17d;
-      --red:#ff5d6c;
-      --purple:#9b7bff;
-      --text:#eef6ff;
-      --muted:#a8bbcf;
-      --border:rgba(71,215,255,.18);
-      --shadow:0 0 0 1px rgba(71,215,255,.12), 0 24px 80px rgba(0,0,0,.45);
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      color:var(--text);
-      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
-      background:
-        radial-gradient(circle at 15% 15%, rgba(71,215,255,.12), transparent 25%),
-        radial-gradient(circle at 85% 20%, rgba(245,193,108,.10), transparent 25%),
-        radial-gradient(circle at 20% 85%, rgba(155,123,255,.10), transparent 22%),
-        linear-gradient(135deg,var(--bg),var(--bg2));
-      min-height:100vh;
-      overflow-x:hidden;
-    }
-    body::before{
-      content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;
-      background-image:linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-      background-size:32px 32px;
-      mask-image:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.08));
-    }
-    .bg-fx{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
-    .orb{position:absolute;border-radius:50%;filter:blur(18px);opacity:.35;animation:float 11s ease-in-out infinite alternate}
-    .o1{width:280px;height:280px;top:6%;right:5%;background:radial-gradient(circle, rgba(71,215,255,.9), transparent 65%)}
-    .o2{width:220px;height:220px;bottom:8%;left:4%;background:radial-gradient(circle, rgba(245,193,108,.85), transparent 65%);animation-duration:13s}
-    .o3{width:180px;height:180px;top:35%;left:10%;background:radial-gradient(circle, rgba(155,123,255,.8), transparent 65%);animation-duration:9s}
-    @keyframes float{from{transform:translateY(0) translateX(0)}to{transform:translateY(-18px) translateX(14px)}}
-
-    .container{max-width:1240px;margin:auto;padding:20px}
-    .screen{display:none}
-    .screen.active{display:block}
-    .hero,.panel,.stage-card,.question,.result,.mini-card,.leaderboard{
-      background:linear-gradient(180deg, rgba(11,20,34,.86), rgba(8,14,25,.94));
-      border:1px solid var(--border);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(12px) saturate(1.1);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero::before,.panel::before,.stage-card::before,.question::before,.result::before,.mini-card::before,.leaderboard::before{
-      content:"";position:absolute;inset:0;pointer-events:none;
-      background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 18%, transparent 35%);
-      transform:translateX(-120%);
-      animation:sheen 9s linear infinite;
-    }
-    @keyframes sheen{to{transform:translateX(130%)}}
-    .hero{padding:34px}
-    .panel,.leaderboard{padding:24px}
-    .stage-card,.mini-card{padding:18px}
-    .question{padding:22px;margin-top:18px}
-    .result{padding:24px;margin-top:20px;display:none;text-align:center;background:linear-gradient(135deg, rgba(41,209,125,.14), rgba(71,215,255,.08), rgba(245,193,108,.10));}
-    h1,h2,h3{margin-top:0}
-    h1{
-      font-size:46px;
-      background:linear-gradient(90deg,#fff,#d7f8ff 35%, #ffd89b 70%, #ffffff 100%);
-      -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px
-    }
-    h2{font-size:30px}
-    h3{color:#d9f2ff}
-    p{line-height:1.9}
-    .tag,.badge,.status-pill{
-      display:inline-block;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:800;
-      border:1px solid rgba(255,255,255,.1)
-    }
-    .tag{background:linear-gradient(135deg, rgba(71,215,255,.18), rgba(245,193,108,.16));color:#fff4d8;margin-bottom:14px}
-    .topbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-    .status-wrap{display:flex;gap:10px;flex-wrap:wrap}
-    .status-pill{background:rgba(255,255,255,.05);color:#eaf7ff;border-color:rgba(255,255,255,.12)}
-    .badge.easy{background:rgba(41,209,125,.12);color:#c9ffe2}
-    .badge.mid{background:rgba(71,215,255,.12);color:#cff7ff}
-    .badge.hard{background:rgba(245,193,108,.14);color:#fff0c4}
-    .badge.boss{background:rgba(255,93,108,.14);color:#ffd0d6}
-
-    .grid{display:grid;gap:16px}
-    .grid-2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
-    .grid-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-
-    .journey{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-top:22px}
-    .node{min-height:78px;border-radius:20px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:900;text-align:center;padding:8px}
-    .node.done{background:linear-gradient(135deg, rgba(41,209,125,.16), rgba(71,215,255,.10));border-color:rgba(41,209,125,.4)}
-    .node.current{background:linear-gradient(135deg, rgba(245,193,108,.18), rgba(71,215,255,.10));border-color:rgba(245,193,108,.45);animation:pulse 1.8s infinite}
-    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,193,108,.22)}50%{box-shadow:0 0 0 10px rgba(245,193,108,0)}}
-
-    .stage-card.locked{opacity:.58}
-    .stage-card.done{border-color:rgba(41,209,125,.36)}
-    .stage-card.current{border-color:rgba(245,193,108,.4)}
-    .stage-card:hover,.mini-card:hover,.question:hover,.panel:hover{transform:translateY(-3px)}
-
-    .name-box{max-width:420px;margin:16px auto 0}
-    input[type="text"]{
-      width:100%;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text);font-size:16px;outline:none
-    }
-    input[type="text"]:focus{border-color:rgba(71,215,255,.55);box-shadow:0 0 0 4px rgba(71,215,255,.12)}
-    input::placeholder{color:#9fb3c8}
-
-    .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
-    button{
-      border:none;border-radius:14px;padding:14px 22px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:.2s ease;position:relative;overflow:hidden
-    }
-    button:hover{transform:translateY(-2px)}
-    button::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg, transparent, rgba(255,255,255,.25), transparent);transform:translateX(-140%)}
-    button:hover::after{animation:btn .8s ease}
-    @keyframes btn{to{transform:translateX(140%)}}
-    .primary{background:linear-gradient(135deg,#14b8ff,#2563eb,#845ef7)}
-    .secondary{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,.12)}
-    .gold{background:linear-gradient(135deg,#f5c16c,#ff9f43,#ff6b6b)}
-    .green{background:linear-gradient(135deg,#00b894,#29d17d,#00d2d3)}
-    .danger{background:linear-gradient(135deg,#e03131,#ff5d6c)}
-
-    .code,.eq{
-      background:linear-gradient(180deg,#040915,#081323);border:1px solid rgba(71,215,255,.18);border-radius:16px;padding:14px 16px;color:#e2efff;direction:ltr;text-align:left;font-family:"Consolas","Courier New",monospace;white-space:pre-wrap;overflow:auto;line-height:1.85;margin:10px 0
-    }
-    .eq{text-align:center}
-    .answers{display:grid;gap:10px;margin-top:14px}
-    .answer-btn{width:100%;text-align:right;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px 14px;color:var(--text)}
-    .answer-btn:hover{background:rgba(71,215,255,.1);border-color:rgba(71,215,255,.3)}
-    .feedback{min-height:32px;margin-top:12px;font-weight:800}
-    .success{color:var(--green)}
-    .error{color:var(--red)}
-    .check-list{display:grid;gap:10px;margin-top:12px}
-    .check-item{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.04)}
-    .drag-bank{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);padding:14px;border-radius:16px;margin-top:12px}
-    .drag-item{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);font-weight:800;cursor:grab;user-select:none}
-    .drag-item.used{opacity:.38;cursor:not-allowed}
-    .drop-slot{display:inline-block;min-width:140px;padding:6px 10px;margin:0 4px;border:2px dashed rgba(71,215,255,.55);border-radius:10px;background:rgba(255,255,255,.03);text-align:center}
-    .drop-slot.filled-slot{border-style:solid;border-color:#29d17d;background:rgba(41,209,125,.12)}
-    .leaderboard ol{margin:10px 0 0;padding-right:20px;line-height:2}
-    .leaderboard li{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin:6px 0;border:1px solid rgba(255,255,255,.08)}
-    .final-code{font-size:60px;font-weight:900;letter-spacing:8px;background:linear-gradient(90deg,#fff,#ffe7b0,#cff7ff,#e3d3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-    .muted{color:var(--muted)}
-    .center{text-align:center}
-    .celebration{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:999;display:none}
-    .confetti{position:absolute;top:-20px;width:12px;height:18px;border-radius:4px;animation:fall 3.8s linear forwards;opacity:.95}
-    @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7}}
-
-    @media (max-width:1100px){.journey{grid-template-columns:repeat(5,1fr)}}
-    @media (max-width:700px){
-      h1{font-size:34px} h2{font-size:24px} .final-code{font-size:42px} .journey{grid-template-columns:repeat(2,1fr)}
-      .hero,.panel,.question,.result,.stage-card,.mini-card,.leaderboard{padding:18px}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TECH 221 - Dilmun Challenge</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#071018;
+  color:white;
+  text-align:center;
+}
+.hero{
+  padding:30px;
+}
+video{
+  width:100%;
+  max-width:900px;
+  border-radius:20px;
+  margin-bottom:20px;
+}
+button{
+  padding:15px 25px;
+  border:none;
+  border-radius:10px;
+  background:#00aaff;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+button:hover{
+  background:#0088cc;
+}
+</style>
 </head>
+
 <body>
-  <div class="bg-fx" aria-hidden="true">
-    <div class="orb o1"></div>
-    <div class="orb o2"></div>
-    <div class="orb o3"></div>
-  </div>
-  <div class="celebration" id="celebration"></div>
 
-  <div class="container">
-    <section class="screen active" id="screen-home">
-      <div class="hero">
-        <div class="topbar">
-          <div class="status-wrap">
-            <div class="status-pill" id="studentBadge">🎯 الطالب: لم يبدأ بعد</div>
-            <div class="status-pill" id="scoreBadge">⭐ النقاط: 0</div>
-            <div class="status-pill" id="xpBadge">⚡ XP: 0</div>
-            <div class="status-pill" id="levelBadge">🧭 المستوى الحالي: البداية</div>
-          </div>
-        </div>
-        <div class="tag">TECH 221 | Dilmun Pearl Quest | Math & Python</div>
-        <h1>💎 تحدي تقن 221: رحلة لؤلؤة دلمون</h1>
-        <p>
-          في أعماق حضارة دلمون القديمة، تناثرت عشر شظايا رقمية تحرسها أبواب رياضية وبرمجية. مهمتك أن تمر عبر جميع المراحل: 
-          من فهم علاقة الرياضيات بالبرمجة، إلى المكتبات، المعادلات، المصفوفات، وحل الأنظمة الخطية، ثم تصل إلى معبد الرسم البياني.
-        </p>
-        <div class="grid grid-3" style="margin-top:18px">
-          <div class="mini-card"><h3>🗺️ 10 مراحل</h3><p>تدرج من السهل إلى المتقدم مع قصة موحدة وروح لعبة كاملة.</p></div>
-          <div class="mini-card"><h3>🔐 58 قفلاً</h3><p>أسئلة أكثر من النسخة السابقة: اختيار، إدخال، سحب، وتحليل كود.</p></div>
-          <div class="mini-card"><h3>🏆 النهاية الكبرى</h3><p>عند إنهاء جميع المراحل تظهر لؤلؤة دلمون ولوحة الشرف المحلية.</p></div>
-        </div>
-        <div class="journey" id="journeyNodes"></div>
-        <div class="name-box">
-          <label><strong>أدخل اسم الطالب</strong></label>
-          <input type="text" id="studentName" placeholder="مثال: محمد" />
-        </div>
-        <div class="btn-row">
-          <button class="primary" onclick="startGame()">🚀 ابدأ الرحلة</button>
-          <button class="secondary" onclick="loadSavedProgress()">📂 تحميل التقدم المحفوظ</button>
-        </div>
-      </div>
+<div class="hero">
 
-      <div class="panel" style="margin-top:18px">
-        <div class="tag">خريطة المراحل</div>
-        <div class="grid grid-2" id="stagesOverview"></div>
-      </div>
-    </section>
+<!-- 🎬 الفيديو -->
+<video autoplay muted loop controls>
+  <source src="video.mp4" type="video/mp4">
+  متصفحك لا يدعم الفيديو
+</video>
 
-    <section class="screen" id="screen-game">
-      <div class="panel">
-        <div class="topbar">
-          <div class="status-wrap">
-            <div class="status-pill" id="studentBadge2">🎯 الطالب:</div>
-            <div class="status-pill" id="scoreBadge2">⭐ النقاط: 0</div>
-            <div class="status-pill" id="xpBadge2">⚡ XP: 0</div>
-            <div class="status-pill" id="levelBadge2">🧭 المستوى الحالي:</div>
-          </div>
-          <div class="status-wrap"><div class="status-pill" id="stageProgressBadge">🔐 القفل: 1 / 6</div></div>
-        </div>
-        <div class="tag" id="stageTag">المستوى</div>
-        <h2 id="stageTitle">عنوان المرحلة</h2>
-        <p id="stageStory" class="muted"></p>
-        <div id="questionHost"></div>
-        <div class="result" id="stageResult">
-          <h3 id="stageResultTitle">تم إنهاء المرحلة</h3>
-          <p id="stageResultText"></p>
-          <div class="btn-row" id="stageResultButtons"></div>
-        </div>
-      </div>
-    </section>
+<h1>💎 TECH 221 – Dilmun Code Breaker</h1>
+<p>Break the Code • Unlock the Levels • Reach the Final Boss</p>
 
-    <section class="screen" id="screen-final">
-      <div class="hero center">
-        <div class="tag">🏆 النهاية الكبرى</div>
-        <h1>تم استرجاع لؤلؤة دلمون الرقمية</h1>
-        <p>أنهيت جميع مراحل تقن 221 من الرياضيات في البرمجة حتى تمثيل الدوال بيانيًا.</p>
-        <div class="final-code">TECH221</div>
-        <p id="finalSummary"></p>
-        <div class="leaderboard">
-          <strong>🏆 لوحة الشرف</strong>
-          <ol id="leaderboardList"><li>بانتظار أول بطل...</li></ol>
-        </div>
-        <div class="btn-row">
-          <button class="gold" onclick="restartAll()">إعادة الرحلة من البداية</button>
-          <button class="secondary" onclick="showScreen('screen-home')">العودة للرئيسية</button>
-          <button class="danger" onclick="clearLeaderboard()">مسح لوحة الشرف</button>
-        </div>
-      </div>
-    </section>
-  </div>
+<button onclick="startGame()">🚀 START CHALLENGE</button>
+
+</div>
 
 <script>
-const stages = [
-  {
-    id:'s1', short:'1', title:'Level 1 - Math & Code Origins', subtitle:'علاقة الرياضيات بالبرمجة', difficulty:'easy',
-    story:'البوابة الأولى تشرح لماذا كانت الرياضيات أساسًا للحوسبة، وكيف تدخل في الألعاب والتشفير والذكاء الاصطناعي.',
-    questions:[
-      {type:'mcq', points:10, prompt:'ما الفائدة الأساسية للرياضيات للمبرمج؟', options:['تصميم خلفيات جميلة فقط','فهم الخوارزميات وحل المشكلات المعقدة','زيادة حجم البرنامج','إلغاء الحاجة للتجربة'], correct:1},
-      {type:'mcq', points:10, prompt:'أي مجال من الآتي ورد كمثال على استخدام الرياضيات في البرمجة؟', options:['تطوير الألعاب','كتابة المقالات','تصميم الشعارات فقط','الأرشفة الورقية'], correct:0},
-      {type:'mcq', points:11, prompt:'في التشفير، ما الدور الرئيس للرياضيات؟', options:['تغيير ألوان الواجهة','توليد مفاتيح التشفير وتحديد قوة الأمان','زيادة سرعة الطابعة','تنسيق النصوص'], correct:1},
-      {type:'mcq', points:11, prompt:'أي مفهوم رياضي يستخدم كثيرًا في الألعاب؟', options:['القوى والتسارع والزوايا','ترتيب الفقرات','الطباعة الثلاثية فقط','النسخ واللصق'], correct:0},
-      {type:'input', points:12, prompt:'أكمل الكلمة: تعتبر الرياضيات شرطًا أساسيًا للانتقال إلى مجالات مثل الذكاء ________.', answer:'الاصطناعي'},
-      {type:'mcq', points:12, prompt:'لماذا يحتاج المبرمج إلى الرياضيات؟', options:['لبناء برامج أكثر كفاءة وقوة','لجعل الشاشة أكبر','لإلغاء الاختبارات','لتقليل عدد الطلاب'], correct:0}
-    ]
-  },
-  {
-    id:'s2', short:'2', title:'Level 2 - Python for Math', subtitle:'تطبيقات الرياضيات في البرمجة', difficulty:'easy',
-    story:'في هذه المحطة تتعرف على سبب تميّز بايثون في حل المسائل الرياضية، وسهولة استخدامها مع مكتبات قوية مثل math و numpy و matplotlib.',
-    questions:[
-      {type:'mcq', points:10, prompt:'لماذا تعتبر بايثون مناسبة للرياضيات؟', options:['لأن أوامرها معقدة جدًا','لسهولة استخدامها وقوة مكتباتها','لأنها لا تستخدم المكتبات','لأنها لا تعرض النتائج'], correct:1},
-      {type:'checkbox', points:12, prompt:'حدّد الأسباب الصحيحة لشعبية بايثون في الرياضيات.', options:['سهولة الاستخدام','مكتبات قوية','مصادر مفتوحة ودعم كبير','لا تعمل إلا في مجال واحد'], correctChecks:[0,1,2]},
-      {type:'mcq', points:10, prompt:'أي مكتبة ذُكرت للتعامل مع المصفوفات والمعادلات الرياضية؟', options:['numpy','paint','audio','zip'], correct:0},
-      {type:'mcq', points:10, prompt:'أي مكتبة تستخدم لتحويل البيانات إلى رسوم بيانية؟', options:['sympy','matplotlib','random','datetime'], correct:1},
-      {type:'input', points:12, prompt:'في معادلة التحويل من فهرنهايت إلى مئوية: C = ((F - 32) × 5) / ؟', answer:'9'},
-      {type:'mcq', points:14, prompt:'أي من الآتي يعد من مجالات استخدام بايثون المذكورة؟', options:['التعلم الآلي والذكاء الاصطناعي وتحليل البيانات','فقط كتابة الرسائل','فقط تصميم الأزرار','لا شيء مما سبق'], correct:0}
-    ]
-  },
-  {
-    id:'s3', short:'3', title:'Level 3 - Library Gate', subtitle:'استخدام المكتبات', difficulty:'mid',
-    story:'بوابة المكتبات تميّز بين المضمنة والخارجية، وتختبر فهمك لوظائف datetime و random و math و NumPy و Matplotlib.',
-    questions:[
-      {type:'mcq', points:10, prompt:'ما المقصود بمكتبات بايثون؟', options:['مجموعة وحدات ودوال جاهزة قابلة لإعادة الاستخدام','ألوان جاهزة للبرمجة','ملفات صوتية','متغيرات ثابتة فقط'], correct:0},
-      {type:'mcq', points:10, prompt:'المكتبات المضمنة هي التي...', options:['تحتاج تثبيتًا خارجيًا دائمًا','تكون موجودة افتراضيًا في بيئة بايثون','لا تحتوي دوال','تعمل دون استيراد'], correct:1},
-      {type:'mcq', points:11, prompt:'أي مكتبة مدمجة للتعامل مع التواريخ والأوقات؟', options:['random','datetime','numpy','matplotlib'], correct:1},
-      {type:'mcq', points:11, prompt:'أي دالة ذُكرت لتوليد عدد عشوائي؟', options:['strftime()','randrange()','plot()','solve()'], correct:1},
-      {type:'checkbox', points:12, prompt:'حدّد المكتبات الخارجية المذكورة.', options:['NumPy','Matplotlib','Pandas','math'], correctChecks:[0,1,2]},
-      {type:'mcq', points:14, prompt:'أي مكتبة توفر دوال مثل sqrt و pow و acos؟', options:['math','random','datetime','pandas'], correct:0}
-    ]
-  },
-  {
-    id:'s4', short:'4', title:'Level 4 - Absolute Temple', subtitle:'معادلات القيم المطلقة', difficulty:'mid',
-    story:'داخل معبد الحرارة في دلمون يجب عليك فهم القيمة المطلقة وحل معادلاتها رياضيًا وبرمجيًا باستخدام sympy ودوال Symbol و Eq و solve.',
-    questions:[
-      {type:'mcq', points:10, prompt:'ما معنى القيمة المطلقة لعدد؟', options:['بعده عن الصفر','إشارته فقط','مربعه','جذره'], correct:0},
-      {type:'input', points:12, prompt:'للمعادلة |x - 20| = 2، اكتب أحد الحلين فقط.', answer:'22'},
-      {type:'mcq', points:10, prompt:'أي مكتبة تستخدم في الدرس لحل معادلات القيمة المطلقة؟', options:['numpy','sympy','matplotlib','random'], correct:1},
-      {type:'drag', points:13, prompt:'رتّب خطوات الحل البرمجي باختصار.', items:['استيراد الدوال من sympy','تعريف المتغير الرمزي x','تعريف المعادلة باستخدام Eq و abs','حل المعادلة باستخدام solve','طباعة الناتج'], accepts:['استيراد الدوال من sympy','تعريف المتغير الرمزي x','تعريف المعادلة باستخدام Eq و abs','حل المعادلة باستخدام solve','طباعة الناتج']},
-      {type:'mcq', points:11, prompt:'ما وظيفة Symbol في هذا الدرس؟', options:['تعريف متغيرات رمزية','رسم المعادلة','جمع المصفوفات','عرض التاريخ'], correct:0},
-      {type:'mcq', points:14, prompt:'أي سطر صحيح لتعريف المعادلة |x-20| = 2 ؟', code:'اختر الصياغة الصحيحة', options:['e = Eq(abs(x-20), 2)','e = abs(Eq(x-20),2)','e = solve(abs(x-20),2)','e = Eq(x-20, abs(2,2))'], correct:0}
-    ]
-  },
-  {
-    id:'s5', short:'5', title:'Level 5 - Quadratic Chamber', subtitle:'المعادلات التربيعية', difficulty:'mid',
-    story:'هنا تختبر فهمك للمعادلات التربيعية كنوع من المعادلات غير الخطية، وكيفية حلها برمجيًا باستخدام numpy.roots.',
-    questions:[
-      {type:'mcq', points:10, prompt:'المعادلات التربيعية تُعد من:', options:['المعادلات الخطية','المعادلات غير الخطية','الدوال الشرطية','المصفوفات'], correct:1},
-      {type:'mcq', points:10, prompt:'أي دالة تُستخدم لاستخراج جذور المعادلة متعددة الحدود؟', options:['solve','roots','plot','abs'], correct:1},
-      {type:'input', points:12, prompt:'في المعادلة x² + 5x + 6 = 0، ما معامل x² ؟', answer:'1'},
-      {type:'mcq', points:11, prompt:'إذا كانت المعاملات [1, 5, 6] فما الدالة الصحيحة للحل؟', options:['np.array(coef)','np.roots(coef)','np.solve(coef)','np.plot(coef)'], correct:1},
-      {type:'mcq', points:12, prompt:'أي كتابة صحيحة لاختصار المكتبة؟', options:['import numpy as np','import np as numpy','from np import numpy','numpy import as np'], correct:0},
-      {type:'input', points:14, prompt:'في المثال x² + 4x - 5 = 0 كان أحد الجذور يساوي:', answer:'1'}
-    ]
-  },
-  {
-    id:'s6', short:'6', title:'Level 6 - Nonlinear Nexus', subtitle:'الأنظمة غير الخطية', difficulty:'hard',
-    story:'الآن تدخل منطقة الأنظمة غير الخطية، حيث تتعامل مع أكثر من معادلة ومتغيرين باستخدام sympy و solve على شكل زوج من المعادلات.',
-    questions:[
-      {type:'mcq', points:10, prompt:'الأنظمة غير الخطية قد تتضمن:', options:['القوى أو الجذور أو الدوال المثلثية','متغيرًا واحدًا دائمًا','أوامر الطباعة فقط','التواريخ فقط'], correct:0},
-      {type:'mcq', points:11, prompt:'أي مكتبة استُخدمت في الدرس لحل الأنظمة غير الخطية؟', options:['numpy','sympy','math','pandas'], correct:1},
-      {type:'checkbox', points:12, prompt:'حدّد الدوال الأساسية المستخدمة.', options:['Symbol','Eq','solve','plot'], correctChecks:[0,1,2]},
-      {type:'mcq', points:11, prompt:'أي سطر صحيح لتعريف المعادلة e2 = 2x - y = 1 ؟', options:['e2 = Eq(2*x - y, 1)','e2 = solve(2*x - y,1)','e2 = Symbol(2*x-y,1)','e2 = Eq(2*x, y, 1)'], correct:0},
-      {type:'mcq', points:12, prompt:'كيف تُمرّر المعادلتان إلى solve؟', options:['solve(e1 + e2, x)','solve((e1,e2), (x,y))','solve([x,y], [e1,e2])','solve(x,y,e1,e2)'], correct:1},
-      {type:'input', points:14, prompt:'في النظام 2x - y = 1، إذا كان x = 1 و y = 1 فالقيمة الناتجة للطرف الأيسر هي:', answer:'1'}
-    ]
-  },
-  {
-    id:'s7', short:'7', title:'Level 7 - Matrix Forge', subtitle:'مقدمة عن المصفوفات', difficulty:'hard',
-    story:'في ورشة المصفوفات تتعلم إنشاء مصفوفة أحادية وثنائية البعد باستخدام numpy.array والتعامل مع الفهرسة index.',
-    questions:[
-      {type:'mcq', points:10, prompt:'المصفوفات تُستخدم في الرياضيات لتنظيم البيانات في:', options:['صفوف وأعمدة','فقرات وعناوين','أصوات وصور','ألوان وظلال'], correct:0},
-      {type:'mcq', points:10, prompt:'أي مكتبة استُخدمت لإنشاء المصفوفات؟', options:['numpy','random','sympy','datetime'], correct:0},
-      {type:'input', points:12, prompt:'في المصفوفة الأحادية يبدأ الرقم الفهرسي من:', answer:'0'},
-      {type:'mcq', points:11, prompt:'أي دالة تُستخدم لإنشاء مصفوفة؟', options:['matrix()','array()','solve()','grid()'], correct:1},
-      {type:'mcq', points:12, prompt:'أي تمثيل صحيح لمصفوفة أحادية لدرجات [100,95,89,90] ؟', options:['np.array([100,95,89,90])','np.array((100,95,89,90))','np.solve([100,95,89,90])','array{100,95,89,90}'], correct:0},
-      {type:'mcq', points:13, prompt:'المصفوفة التي تحتوي صفوفًا وأعمدة تسمى:', options:['أحادية البعد','ثنائية البعد','شرطية','رمزية'], correct:1}
-    ]
-  },
-  {
-    id:'s8', short:'8', title:'Level 8 - Matrix Operations Arena', subtitle:'العمليات على المصفوفات', difficulty:'hard',
-    story:'الساحة الثامنة تختبر فهمك لدوال numpy الخاصة بجمع وطرح وضرب وقسمة المصفوفات عنصرًا بعنصر حسب الموقع index.',
-    questions:[
-      {type:'checkbox', points:12, prompt:'حدّد دوال العمليات على المصفوفات المذكورة.', options:['add','subtract','multiply','divide','show'], correctChecks:[0,1,2,3]},
-      {type:'mcq', points:10, prompt:'العملية بين المصفوفات تتم غالبًا بين العناصر الموجودة في:', options:['أماكن عشوائية','نفس الموقع index','أول صف فقط','آخر عمود فقط'], correct:1},
-      {type:'mcq', points:10, prompt:'أي دالة تُستخدم لجمع مصفوفتين؟', options:['divide','add','subtract','roots'], correct:1},
-      {type:'mcq', points:11, prompt:'أي دالة تُستخدم لضرب مصفوفتين أو أكثر؟', options:['array','multiply','grid','plot'], correct:1},
-      {type:'drag', points:14, prompt:'رتّب الخطوات الصحيحة لبرنامج عملية على مصفوفتين.', items:['import numpy as np','arr1=np.array([[10,15],[12,18]])','arr2=np.array([[3,6],[2,5]])','res=np.add(arr1,arr2)','print(res)'], accepts:['import numpy as np','arr1=np.array([[10,15],[12,18]])','arr2=np.array([[3,6],[2,5]])','res=np.add(arr1,arr2)','print(res)']},
-      {type:'input', points:13, prompt:'إذا جمعنا 10 مع 2 في نفس الموقع فالناتج هو:', answer:'12'}
-    ]
-  },
-  {
-    id:'s9', short:'9', title:'Level 9 - Linear Solve Hall', subtitle:'حل الأنظمة الخطية', difficulty:'hard',
-    story:'في قاعة الحافلات الكبيرة والصغيرة، ستستخدم مصفوفة المعاملات والثوابت مع np.linalg.solve لحل الأنظمة الخطية.',
-    questions:[
-      {type:'mcq', points:10, prompt:'الدالة المستخدمة في الدرس لحل الأنظمة الخطية هي:', options:['np.roots','np.linalg.solve','np.plot','np.abs'], correct:1},
-      {type:'mcq', points:11, prompt:'في النظام ax + by = h، ماذا تمثل a و b ؟', options:['الثوابت فقط','المعاملات','المحاور','الدوال'], correct:1},
-      {type:'mcq', points:11, prompt:'أي تعريف صحيح لمصفوفة الثوابت للنظام 30x + 10y = 180 و 30x + 20y = 210 ؟', options:['np.array([[180,210]])','np.array([180,210])','np.array([[30,10],[30,20]])','np.array([30,20])'], correct:1},
-      {type:'mcq', points:12, prompt:'أي سطر صحيح للحل؟', options:['result = np.linalg.solve(coef, cons)','result = np.solve(coef, cons)','result = np.linalg.solve(cons, coef)','result = solve.linalg(np, coef)'], correct:0},
-      {type:'input', points:13, prompt:'في مثال الحافلات كان الناتج [5. 3.]، إذن قيمة x تساوي:', answer:'5'},
-      {type:'mcq', points:14, prompt:'مصفوفة المعاملات للنظام 2x+3y=7 و 4x−y=1 هي:', options:['[[7,1],[2,3]]','[[2,3],[4,-1]]','[[2,4],[3,-1]]','[2,3,4,-1]'], correct:1}
-    ]
-  },
-  {
-    id:'s10', short:'BOSS', title:'Final Boss - Charts Sanctuary', subtitle:'رسم الدوال بيانيًا', difficulty:'boss',
-    story:'المحطة الأخيرة هي معبد الرسم البياني. يجب أن تثبت فهمك لـ numpy.linspace و matplotlib.pyplot.plot وعناوين المحاور والشبكة والعرض.',
-    questions:[
-      {type:'mcq', points:10, prompt:'أي مكتبة استُخدمت لإنشاء قيم المحور السيني؟', options:['sympy','numpy','random','datetime'], correct:1},
-      {type:'mcq', points:10, prompt:'أي دالة ترسم المعادلة؟', options:['plot','grid','solve','array'], correct:0},
-      {type:'mcq', points:11, prompt:'أي دالة تكتب عنوان المحور الصادي؟', options:['xlabel','ylabel','title','show'], correct:1},
-      {type:'mcq', points:11, prompt:'أي دالة تعرض خطوط الشبكة؟', options:['grid','show','roots','abs'], correct:0},
-      {type:'mcq', points:12, prompt:'أي كتابة صحيحة لإنشاء قيم x بين 20 و 60 ؟', options:['x=np.linspace(20,60)','x=np.linspace(60,20)','x=linspace(20,60)','x=np.plot(20,60)'], correct:0},
-      {type:'drag', points:14, prompt:'رتّب البرنامج المختصر للرسم البياني.', items:['import numpy as np','import matplotlib.pyplot as plt','x=np.linspace(-50,50)','que=x**2 + 7*x - 120','plt.plot(x,que)','plt.show()'], accepts:['import numpy as np','import matplotlib.pyplot as plt','x=np.linspace(-50,50)','que=x**2 + 7*x - 120','plt.plot(x,que)','plt.show()']},
-      {type:'input', points:16, prompt:'أكمل اسم الدالة المسؤولة عن عرض الرسم البياني: plt.____()', answer:'show'}
-    ]
-  }
-];
-
-let currentStudent='';
-let score=0;
-let xp=0;
-let currentStage=0;
-let currentQuestion=0;
-let draggedItem=null;
-
-function $(id){return document.getElementById(id)}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); window.scrollTo({top:0,behavior:'smooth'})}
-function refreshStatus(){
-  const stageName = stages[currentStage] ? stages[currentStage].subtitle : 'البداية';
-  const studentText = `🎯 الطالب: ${currentStudent || 'لم يبدأ بعد'}`;
-  const scoreText = `⭐ النقاط: ${score}`;
-  const xpText = `⚡ XP: ${xp}`;
-  const levelText = `🧭 المستوى الحالي: ${stageName}`;
-  ['studentBadge','studentBadge2'].forEach(id=>$(id).textContent=studentText);
-  ['scoreBadge','scoreBadge2'].forEach(id=>$(id).textContent=scoreText);
-  ['xpBadge','xpBadge2'].forEach(id=>$(id).textContent=xpText);
-  ['levelBadge','levelBadge2'].forEach(id=>$(id).textContent=levelText);
-  $('stageProgressBadge').textContent = stages[currentStage] ? `🔐 القفل: ${Math.min(currentQuestion+1, stages[currentStage].questions.length)} / ${stages[currentStage].questions.length}` : '🔐 القفل';
-  renderOverview(); renderJourney();
-}
-function renderJourney(){
-  const host=$('journeyNodes'); host.innerHTML='';
-  stages.forEach((s,idx)=>{
-    const node=document.createElement('div'); node.className='node';
-    if(idx<currentStage) node.classList.add('done');
-    if(idx===currentStage && currentStudent) node.classList.add('current');
-    node.innerHTML=`<div>${s.short}</div><small>${s.subtitle}</small>`;
-    host.appendChild(node);
-  })
-}
-function renderOverview(){
-  const host=$('stagesOverview'); host.innerHTML='';
-  stages.forEach((s,idx)=>{
-    const status = idx<currentStage ? 'done' : idx===currentStage && currentStudent ? 'current' : idx>currentStage ? 'locked' : '';
-    const el=document.createElement('div'); el.className=`stage-card ${status}`;
-    el.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><strong>${s.title}</strong><span class="badge ${s.difficulty}">${s.subtitle}</span></div><div class="muted" style="margin-top:8px">${s.story}</div><div style="margin-top:10px"><small>عدد الأقفال: ${s.questions.length}</small></div>`;
-    host.appendChild(el);
-  })
-}
 function startGame(){
-  currentStudent=$('studentName').value.trim() || 'طالب متميز'; score=0; xp=0; currentStage=0; currentQuestion=0; saveProgress(); refreshStatus(); openStage(0);
+  alert("🚀 Let the challenge begin!");
 }
-function openStage(stageIndex){currentStage=stageIndex; currentQuestion=0; showScreen('screen-game'); renderStage(); saveProgress()}
-function renderStage(){
-  const s=stages[currentStage]; $('stageTag').textContent=s.subtitle; $('stageTitle').textContent=s.title; $('stageStory').textContent=s.story; $('stageResult').style.display='none'; $('questionHost').innerHTML=''; renderQuestion(); refreshStatus(); setupDragEvents();
-}
-function renderQuestion(){
-  const q=stages[currentStage].questions[currentQuestion]; const host=$('questionHost'); host.innerHTML=''; const wrap=document.createElement('div'); wrap.className='question';
-  let html=`<div><strong>القفل ${currentQuestion+1}:</strong> ${q.prompt}</div>`;
-  if(q.code) html+=`<div class="code">${escapeHtml(q.code)}</div>`;
-  if(q.type==='mcq'){
-    html+=`<div class="answers">`+q.options.map((opt,idx)=>`<button class="answer-btn" onclick="answerMCQ(${idx})">${escapeHtml(opt)}</button>`).join('')+`</div>`;
-  } else if(q.type==='input'){
-    html+=`<div class="name-box" style="margin:16px 0 0;max-width:420px"><input type="text" id="shortAnswer" placeholder="اكتب الإجابة هنا" /></div><div class="btn-row"><button class="primary" onclick="answerInput()">تحقق من الإجابة</button></div>`;
-  } else if(q.type==='checkbox'){
-    html+=`<div class="check-list">`+q.options.map((opt,idx)=>`<label class="check-item"><input type="checkbox" class="check-opt" value="${idx}"> ${escapeHtml(opt)}</label>`).join('')+`</div><div class="btn-row"><button class="primary" onclick="answerCheckbox()">تحقق من الاختيارات</button></div>`;
-  } else if(q.type==='drag'){
-    const group=`drag${currentStage}_${currentQuestion}`;
-    html+=`<div class="code">`+q.accepts.map((a,idx)=>`<span class="drop-slot" data-group="${group}" data-accept="${escapeAttr(a)}">اسحب هنا</span>${idx<q.accepts.length-1?'<br>':''}`).join('')+`</div>`;
-    html+=`<div class="drag-bank">`+shuffle([...q.items]).map(item=>`<div class="drag-item" draggable="true" data-group="${group}" data-value="${escapeAttr(item)}">${escapeHtml(item)}</div>`).join('')+`</div><div class="btn-row"><button class="secondary" onclick="resetDragCurrent()">إعادة الترتيب</button><button class="primary" onclick="answerDrag()">تحقق من الإجابة</button></div>`;
-  }
-  html+=`<div class="feedback" id="feedback"></div>`;
-  wrap.innerHTML=html; host.appendChild(wrap); wrap.classList.add('active');
-}
-function answerMCQ(idx){const q=stages[currentStage].questions[currentQuestion]; idx===q.correct?handleCorrect(q.points):handleWrong(4)}
-function normalizeAnswer(v){return String(v).trim().replace(/\s+/g,' ').toLowerCase()}
-function answerInput(){const q=stages[currentStage].questions[currentQuestion]; const val=$('shortAnswer').value; normalizeAnswer(val)===normalizeAnswer(q.answer)?handleCorrect(q.points):handleWrong(4)}
-function answerCheckbox(){const q=stages[currentStage].questions[currentQuestion]; const checked=[...document.querySelectorAll('.check-opt:checked')].map(x=>Number(x.value)).sort((a,b)=>a-b); const expected=[...q.correctChecks].sort((a,b)=>a-b); JSON.stringify(checked)===JSON.stringify(expected)?handleCorrect(q.points):handleWrong(5)}
-function answerDrag(){const group=`drag${currentStage}_${currentQuestion}`; const slots=document.querySelectorAll(`.drop-slot[data-group="${group}"]`); const ok=[...slots].every(slot=>slot.dataset.value===slot.dataset.accept); ok?handleCorrect(stages[currentStage].questions[currentQuestion].points):handleWrong(5)}
-function handleCorrect(points){score+=points; xp+=points*2; const fb=$('feedback'); fb.textContent=`إجابة صحيحة ✅ +${points} نقطة`; fb.className='feedback success'; saveProgress(); refreshStatus(); setTimeout(nextQuestion,650)}
-function handleWrong(penalty){score=Math.max(0,score-penalty); const fb=$('feedback'); fb.textContent=`إجابة غير صحيحة ❌ تم خصم ${penalty} نقاط`; fb.className='feedback error'; saveProgress(); refreshStatus()}
-function nextQuestion(){const s=stages[currentStage]; currentQuestion++; if(currentQuestion>=s.questions.length){stageCompleted(); return;} renderQuestion(); refreshStatus(); setupDragEvents(); saveProgress()}
-function stageCompleted(){
-  const s=stages[currentStage]; $('stageResult').style.display='block'; $('stageResultTitle').textContent=`تم إنهاء ${s.subtitle}`; $('stageResultText').textContent='أحسنت! فُتح الباب التالي من رحلة دلمون.';
-  const btns=$('stageResultButtons'); btns.innerHTML='';
-  const nextBtn=document.createElement('button'); nextBtn.className='primary';
-  if(currentStage<stages.length-1){ nextBtn.textContent='الانتقال للمرحلة التالية'; nextBtn.onclick=()=>{currentStage++; currentQuestion=0; launchCelebration(); renderStage(); saveProgress();}; }
-  else { nextBtn.textContent='عرض النتيجة النهائية'; nextBtn.onclick=finishGame; }
-  btns.appendChild(nextBtn);
-  const homeBtn=document.createElement('button'); homeBtn.className='secondary'; homeBtn.textContent='العودة للرئيسية'; homeBtn.onclick=()=>showScreen('screen-home'); btns.appendChild(homeBtn);
-  launchCelebration(); refreshStatus(); saveProgress();
-}
-function finishGame(){saveToLeaderboard(); renderLeaderboard(); $('finalSummary').innerHTML=`🎯 الطالب: <strong>${currentStudent}</strong> — ⭐ النقاط النهائية: <strong>${score}</strong> — ⚡ XP: <strong>${xp}</strong>`; showScreen('screen-final'); launchCelebration(); localStorage.removeItem('tech221Progress')}
-function saveProgress(){localStorage.setItem('tech221Progress', JSON.stringify({currentStudent,score,xp,currentStage,currentQuestion}))}
-function loadSavedProgress(){const raw=localStorage.getItem('tech221Progress'); if(!raw){alert('لا يوجد تقدم محفوظ حالياً.'); return;} const data=JSON.parse(raw); currentStudent=data.currentStudent||''; score=data.score||0; xp=data.xp||0; currentStage=data.currentStage||0; currentQuestion=data.currentQuestion||0; showScreen('screen-game'); const s=stages[currentStage]; $('stageTag').textContent=s.subtitle; $('stageTitle').textContent=s.title; $('stageStory').textContent=s.story; $('stageResult').style.display='none'; renderQuestion(); refreshStatus(); setupDragEvents()}
-function restartAll(){localStorage.removeItem('tech221Progress'); currentStudent=''; score=0; xp=0; currentStage=0; currentQuestion=0; $('studentName').value=''; renderOverview(); renderJourney(); refreshStatus(); showScreen('screen-home')}
-function getLeaderboard(){return JSON.parse(localStorage.getItem('tech221Leaderboard')||'[]')}
-function saveToLeaderboard(){const data=getLeaderboard(); data.push({name:currentStudent||'طالب متميز',score,xp}); data.sort((a,b)=>b.score!==a.score?b.score-a.score:b.xp-a.xp); localStorage.setItem('tech221Leaderboard', JSON.stringify(data.slice(0,10)))}
-function renderLeaderboard(){const board=$('leaderboardList'); const data=getLeaderboard(); board.innerHTML=''; if(!data.length){board.innerHTML='<li>بانتظار أول بطل...</li>'; return;} data.forEach(item=>{const li=document.createElement('li'); li.textContent=`${item.name} — ${item.score} نقطة — XP ${item.xp}`; board.appendChild(li)})}
-function clearLeaderboard(){localStorage.removeItem('tech221Leaderboard'); renderLeaderboard()}
-function launchCelebration(){const layer=$('celebration'); layer.innerHTML=''; layer.style.display='block'; const colors=['#47d7ff','#f5c16c','#29d17d','#9b7bff','#ff9f43','#ff5d6c']; for(let i=0;i<120;i++){const p=document.createElement('div'); p.className='confetti'; p.style.left=Math.random()*100+'vw'; p.style.background=colors[Math.floor(Math.random()*colors.length)]; p.style.animationDelay=(Math.random()*0.8)+'s'; p.style.transform=`translateY(0) rotate(${Math.random()*360}deg)`; layer.appendChild(p)} setTimeout(()=>{layer.style.display='none'; layer.innerHTML='';},4200)}
-function setupDragEvents(){
-  document.querySelectorAll('.drag-item').forEach(item=>{
-    item.addEventListener('dragstart',e=>{if(item.classList.contains('used')){e.preventDefault(); return;} draggedItem=item});
-    item.addEventListener('click',()=>{if(item.classList.contains('used')) return; const group=item.dataset.group; const slot=document.querySelector(`.drop-slot[data-group="${group}"]:not(.filled-slot)`); if(!slot) return; handleDropToSlot(slot,item);});
-  });
-  document.querySelectorAll('.drop-slot').forEach(slot=>{
-    slot.addEventListener('dragover',e=>e.preventDefault());
-    slot.addEventListener('drop',e=>{e.preventDefault(); if(!draggedItem) return; handleDropToSlot(slot, draggedItem); draggedItem=null;});
-  });
-}
-function handleDropToSlot(slot,item){if(slot.dataset.group!==item.dataset.group) return; const oldValue=slot.dataset.value; if(oldValue){const oldItem=[...document.querySelectorAll(`.drag-item[data-group="${slot.dataset.group}"]`)].find(el=>el.dataset.value===oldValue); if(oldItem) oldItem.classList.remove('used');} slot.textContent=item.dataset.value; slot.dataset.value=item.dataset.value; slot.classList.add('filled-slot'); item.classList.add('used')}
-function resetDragCurrent(){const group=`drag${currentStage}_${currentQuestion}`; document.querySelectorAll(`.drop-slot[data-group="${group}"]`).forEach(slot=>{slot.textContent='اسحب هنا'; slot.dataset.value=''; slot.classList.remove('filled-slot')}); document.querySelectorAll(`.drag-item[data-group="${group}"]`).forEach(item=>item.classList.remove('used'))}
-function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr}
-function escapeHtml(text){return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function escapeAttr(text){return String(text).replace(/"/g,'&quot;')}
-renderOverview(); renderJourney(); renderLeaderboard(); refreshStatus();
 </script>
+
 </body>
 </html>
